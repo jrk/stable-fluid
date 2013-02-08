@@ -16,7 +16,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <GL/glut.h>
+#include <GLUT/glut.h>
 
 /* macros */
 
@@ -24,8 +24,13 @@
 
 /* external definitions (from solver.c) */
 
+/*
 extern void dens_step ( int N, float * x, float * x0, float * u, float * v, float diff, float dt );
 extern void vel_step ( int N, float * u, float * v, float * u0, float * v0, float visc, float dt );
+*/
+extern void step( int N, float visc, float diff, float dt,
+           float* u, float* v, float* u_prev, float* v_prev,
+           float* dens, float* dens_prev );
 
 /* global variables */
 
@@ -254,8 +259,10 @@ static void reshape_func ( int width, int height )
 static void idle_func ( void )
 {
 	get_from_UI ( dens_prev, u_prev, v_prev );
-	vel_step ( N, u, v, u_prev, v_prev, visc, dt );
-	dens_step ( N, dens, dens_prev, u, v, diff, dt );
+    step( N, visc, diff, dt,
+          u, v, u_prev, v_prev,
+          dens, dens_prev );
+    
 
 	glutSetWindow ( win_id );
 	glutPostRedisplay ();
@@ -313,7 +320,7 @@ int main ( int argc, char ** argv )
 {
 	glutInit ( &argc, argv );
 
-	if ( argc != 1 && argc != 6 ) {
+	if ( argc != 1 && argc != 7 ) {
 		fprintf ( stderr, "usage : %s N dt diff visc force source\n", argv[0] );
 		fprintf ( stderr, "where:\n" );\
 		fprintf ( stderr, "\t N      : grid resolution\n" );

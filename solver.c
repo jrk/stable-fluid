@@ -97,3 +97,10 @@ void vel_step ( int N, float * u, float * v, float * u0, float * v0, float visc,
 	project ( N, u, v, u0, v0 );
 }
 
+void step( int N, float visc, float diff, float dt,
+           float* u, float* v, float* u_prev, float* v_prev,
+           float* dens, float* dens_prev )
+{
+    vel_step ( N, u, v, u_prev, v_prev, visc, dt );
+    dens_step ( N, dens, dens_prev, u, v, diff, dt );
+}
