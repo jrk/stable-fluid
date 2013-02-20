@@ -23,37 +23,12 @@ static Param<int> _N;
 static Param<float> _diff, _dt, _visc;
 static ImageParam _x, _s;
 static Func _add_source;
+static Func _set_bnd[3];
 void add_source ( int N, float * x, float * s, float dt  )
 {
     #if 1
-    #if 0
-    buffer_t bx, bs;
-    bx.elem_size = sizeof(float);
-    bx.stride[0] = 1;
-    bx.stride[1] = N+2;
-    bx.stride[2] = (N+2)*(N+2);
-    bx.host = (uint8_t*)x;
-
-    bs.elem_size = sizeof(float);
-    bs.stride[0] = 1;
-    bs.stride[1] = N+2;
-    bs.stride[2] = (N+2)*(N+2);
-    bs.host = (uint8_t*)s;
-
-    // Buffer bbx(Float(32), &bx);
-    _x.set(Buffer(Float(32), &bx));
-    _s.set(Buffer(Float(32), &bs));
-
-    #else
-    Buffer bx(Float(32), N+2, N+2, 0, 0, (uint8_t*)x);
-    Buffer bs(Float(32), N+2, N+2, 0, 0, (uint8_t*)s);
-
-    // memcpy(bx.host_ptr(), x, sizeof(float)*(N+2)*(N+2));
-    // memcpy(bs.host_ptr(), s, sizeof(float)*(N+2)*(N+2));
-
-    _x.set(bx);
-    _s.set(bs);
-    #endif
+    _x.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)x));
+    _s.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)s));
 
     _dt.set(dt);
     _N.set(N);
@@ -93,6 +68,12 @@ Func set_bnd_func ( int N, int b, Func in )
 
 void set_bnd ( int N, int b, float * x )
 {
+    #if 1
+    _x.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)x));
+
+    Image<float> res = _set_bnd[b].realize(N+2,N+2);
+    memcpy(x, res.data(), sizeof(float)*res.width()*res.height());
+    #else
     int i;
 
     for ( i=1 ; i<=N ; i++ ) {
@@ -105,6 +86,7 @@ void set_bnd ( int N, int b, float * x )
     x[IX(0  ,N+1)] = 0.5f*(x[IX(1,N+1)]+x[IX(0  ,N)]);
     x[IX(N+1,0  )] = 0.5f*(x[IX(N,0  )]+x[IX(N+1,1)]);
     x[IX(N+1,N+1)] = 0.5f*(x[IX(N,N+1)]+x[IX(N+1,N)]);
+    #endif
 }
 
 Expr lin_solve_step( Expr cx, Expr cy, int b, Func in, Func x0, float a, float c )
@@ -228,6 +210,10 @@ void hlinit( int _N, float _visc, float _diff, float _dt )
     s(x,y) = _s(clamp(x, 0, N+1), clamp(y, 0, N+1));
 
     _add_source = add_source_func(N, in, s, dt);
+
+    for (int b = 0; b < 3; b++) {
+        _set_bnd[b] = set_bnd_func(N, b, in);
+    }
 }
 
 void hlstep( int N, float* u, float* v, float* u_prev, float* v_prev,
