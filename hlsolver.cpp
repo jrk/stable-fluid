@@ -1,4 +1,5 @@
 #include <Halide.h>
+#include <string.h>
 
 using namespace Halide;
 
@@ -24,6 +25,7 @@ static ImageParam _x, _s, _x0, _u, _v;
 static Func _add_source;
 static Func _set_bnd[3];
 static Func _lin_solve[3];
+static Func _project;
 
 void add_source ( int N, float * x, float * s, float dt  )
 {
@@ -189,8 +191,48 @@ void advect ( int b, float * d, float * d0, float * u, float * v )
     #endif
 }
 
+Func project_func ( Func u, Func v )
+{
+    Var x("x"), y("y");
+    Func div, zero;
+    div(x,y) = -0.5f*(u(x+1,y)-u(x-1,y)+v(x,y+1)-v(x,y-1))/N;
+    zero(x,y) = 0.f;
+
+    Func p = lin_solve_func(N, 0, zero, set_bnd_func(N, 0, div), 1.0f, 4.0f);
+    p.compute_root().store_root();
+
+    Func uu, vv;
+
+    uu(x,y) = u(x,y) - 0.5f*N*(p(x+1,y)-p(x-1,y));
+    vv(x,y) = v(x,y) - 0.5f*N*(p(x,y+1)-p(x,y-1));
+
+    Func res;
+    Var uv("uv");
+    res(x,y,uv) = select(uv == 0,
+                    set_bnd_func(N, 1, uu)(x,y),
+                    select(uv == 1,
+                        set_bnd_func(N, 2, vv)(x,y),
+                        select(uv == 2,
+                            p(x,y),
+                            div(x,y))));
+    // res.unroll(uv, 4);
+    return res;
+}
+
 void project ( float * u, float * v, float * p, float * div )
 {
+    #if 1
+    _u.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)u));
+    _v.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)v));
+
+    Image<float> res = _project.realize(N+2, N+2, 4);
+    size_t sz = sizeof(float)*res.width()*res.height();
+    size_t stride = res.stride(2);
+    memcpy(  u, res.data()+0*stride, sz);
+    memcpy(  v, res.data()+1*stride, sz);
+    memcpy(  p, res.data()+2*stride, sz);
+    memcpy(div, res.data()+3*stride, sz);
+    #else
     int i, j;
 
     FOR_EACH_CELL
@@ -206,6 +248,7 @@ void project ( float * u, float * v, float * p, float * div )
         v[IX(i,j)] -= 0.5f*N*(p[IX(i,j+1)]-p[IX(i,j-1)]);
     END_FOR
     set_bnd ( N, 1, u ); set_bnd ( N, 2, v );
+    #endif
 }
 
 void dens_step ( float * x, float * x0, float * u, float * v )
@@ -262,6 +305,8 @@ void hlinit( int _N, float _visc, float _diff, float _dt )
         _lin_solve[b] = lin_solve_func(N, b, in, in0, _a, _c);
         _advect[b] = advect_func(b, in0, u, v);
     }
+
+    _project = project_func(u, v);
 }
 
 void hlstep( int N, float* u, float* v, float* u_prev, float* v_prev,
