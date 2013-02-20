@@ -20,10 +20,12 @@ Func add_source_func( int N, Func in, Func s, float dt )
 static int N;
 static float dt, diff, visc;
 static Param<int> _N;
-static Param<float> _diff, _dt, _visc;
-static ImageParam _x, _s;
+static Param<float> _diff, _dt, _visc, _a, _c;
+static ImageParam _x, _s, _x0;
 static Func _add_source;
 static Func _set_bnd[3];
+static Func _lin_solve[3];
+
 void add_source ( int N, float * x, float * s, float dt  )
 {
     #if 1
@@ -89,31 +91,37 @@ void set_bnd ( int N, int b, float * x )
     #endif
 }
 
-Expr lin_solve_step( Expr cx, Expr cy, int b, Func in, Func x0, float a, float c )
+Func lin_solve_func ( int N, int b, Func in, Func x0, Expr a, Expr c, int num_steps=20 )
 {
-    return (x0(cx,cy) + a*(in(cx-1,cy)+in(cx+1,cy)+in(cx,cy-1)+in(cx,cy+1)))/c;
-}
-
-static const int NUM_STEPS = 20;
-Func lin_solve_func ( int N, int b, Func in, Func x0, float a, float c )
-{
-    Var x,y;
+    Var x("x"),y("y");
     Expr cx = clamp(x, 1, N);
     Expr cy = clamp(y, 1, N);
-    Func step[NUM_STEPS];
+    Func prevStep = in;
 
-    step[0](x,y) = lin_solve_step(cx, cy, b, in, x0, a, c);
-    for ( int k=1 ; k<NUM_STEPS ; k++ ) {
+    for ( int k=0 ; k<num_steps ; k++ ) {
         Func f;
-        f(x,y) = lin_solve_step(cx, cy, b, step[k-1], x0, a, c);
-        step[k] = set_bnd_func ( N, b, f );
+        f(x,y) = (x0(cx,cy) + a*(prevStep(cx-1,cy)
+                                +prevStep(cx+1,cy)
+                                +prevStep(cx,cy-1)
+                                +prevStep(cx,cy+1)))/c;
+        prevStep = set_bnd_func ( N, b, f );
+        prevStep.compute_root().store_root().parallel(y);
     }
 
-    return step[NUM_STEPS-1];
+    return prevStep;
 }
 
-void lin_solve ( int N, int b, float * x, float * x0, float a, float c )
+void lin_solve ( int b, float * x, float * x0, float a, float c )
 {
+    #if 1
+    _a.set(a);
+    _c.set(c);
+    _x.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)x));
+    _x0.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)x0));
+
+    Image<float> res = _lin_solve[b].realize(N+2,N+2);
+    memcpy(x, res.data(), sizeof(float)*res.width()*res.height());
+    #else
     int i, j, k;
 
     for ( k=0 ; k<20 ; k++ ) {
@@ -122,17 +130,18 @@ void lin_solve ( int N, int b, float * x, float * x0, float a, float c )
         END_FOR
         set_bnd ( N, b, x );
     }
+    #endif
 }
 
-void diffuse ( int N, int b, float * x, float * x0, float diff, float dt )
+void diffuse ( int b, float * x, float * x0, float diff )
 {
     float a=dt*diff*N*N;
     // Param<Float(32)> diff;
     // Func solver = lin_solve_func(N, b, inf, x0f, a, 1+4*a);
-    lin_solve ( N, b, x, x0, a, 1+4*a );
+    lin_solve ( b, x, x0, a, 1+4*a );
 }
 
-void advect ( int N, int b, float * d, float * d0, float * u, float * v, float dt )
+void advect ( int b, float * d, float * d0, float * u, float * v )
 {
     int i, j, i0, j0, i1, j1;
     float x, y, s0, t0, s1, t1, dt0;
@@ -149,7 +158,7 @@ void advect ( int N, int b, float * d, float * d0, float * u, float * v, float d
     set_bnd ( N, b, d );
 }
 
-void project ( int N, float * u, float * v, float * p, float * div )
+void project ( float * u, float * v, float * p, float * div )
 {
     int i, j;
 
@@ -159,7 +168,7 @@ void project ( int N, float * u, float * v, float * p, float * div )
     END_FOR 
     set_bnd ( N, 0, div ); set_bnd ( N, 0, p );
 
-    lin_solve ( N, 0, p, div, 1, 4 );
+    lin_solve ( 0, p, div, 1, 4 );
 
     FOR_EACH_CELL
         u[IX(i,j)] -= 0.5f*N*(p[IX(i+1,j)]-p[IX(i-1,j)]);
@@ -171,19 +180,19 @@ void project ( int N, float * u, float * v, float * p, float * div )
 void dens_step ( float * x, float * x0, float * u, float * v )
 {
     add_source ( N, x, x0, dt );
-    SWAP ( x0, x ); diffuse ( N, 0, x, x0, diff, dt );
-    SWAP ( x0, x ); advect ( N, 0, x, x0, u, v, dt );
+    SWAP ( x0, x ); diffuse ( 0, x, x0, diff );
+    SWAP ( x0, x ); advect ( 0, x, x0, u, v );
 }
 
 void vel_step ( float * u, float * v, float * u0, float * v0 )
 {
     add_source ( N, u, u0, dt ); add_source ( N, v, v0, dt );
-    SWAP ( u0, u ); diffuse ( N, 1, u, u0, visc, dt );
-    SWAP ( v0, v ); diffuse ( N, 2, v, v0, visc, dt );
-    project ( N, u, v, u0, v0 );
+    SWAP ( u0, u ); diffuse ( 1, u, u0, visc );
+    SWAP ( v0, v ); diffuse ( 2, v, v0, visc );
+    project ( u, v, u0, v0 );
     SWAP ( u0, u ); SWAP ( v0, v );
-    advect ( N, 1, u, u0, u0, v0, dt ); advect ( N, 2, v, v0, u0, v0, dt );
-    project ( N, u, v, u0, v0 );
+    advect ( 1, u, u0, u0, v0 ); advect ( 2, v, v0, u0, v0 );
+    project ( u, v, u0, v0 );
 }
 
 void step( float* u, float* v, float* u_prev, float* v_prev,
@@ -202,17 +211,20 @@ void hlinit( int _N, float _visc, float _diff, float _dt )
     dt = _dt;
 
     _x = ImageParam(Float(32), 2, "Xbuf");
+    _x0= ImageParam(Float(32), 2, "X0buf");
     _s = ImageParam(Float(32), 2, "Sbuf");
 
     Var x("x"),y("y");
-    Func in("X"), s("S");
+    Func in("X"), in0("X0"), s("S");
     in(x,y) = _x(clamp(x, 0, N+1), clamp(y, 0, N+1));
-    s(x,y) = _s(clamp(x, 0, N+1), clamp(y, 0, N+1));
+    in0(x,y)=_x0(clamp(x, 0, N+1), clamp(y, 0, N+1));
+    s(x,y)  = _s(clamp(x, 0, N+1), clamp(y, 0, N+1));
 
     _add_source = add_source_func(N, in, s, dt);
 
     for (int b = 0; b < 3; b++) {
         _set_bnd[b] = set_bnd_func(N, b, in);
+        _lin_solve[b] = lin_solve_func(N, b, in, in0, _a, _c);
     }
 }
 
