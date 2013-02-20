@@ -19,9 +19,8 @@ Func add_source_func( int N, Func in, Func s, float dt )
 
 static int N;
 static float dt, diff, visc;
-static Param<int> _N;
-static Param<float> _diff, _dt, _visc, _a, _c;
-static ImageParam _x, _s, _x0;
+static Param<float> _diff, _visc, _a, _c;
+static ImageParam _x, _s, _x0, _u, _v;
 static Func _add_source;
 static Func _set_bnd[3];
 static Func _lin_solve[3];
@@ -31,9 +30,6 @@ void add_source ( int N, float * x, float * s, float dt  )
     #if 1
     _x.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)x));
     _s.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)s));
-
-    _dt.set(dt);
-    _N.set(N);
 
     Image<float> res = _add_source.realize(N+2,N+2);
     memcpy(x, res.data(), sizeof(float)*res.width()*res.height());
@@ -141,8 +137,42 @@ void diffuse ( int b, float * x, float * x0, float diff )
     lin_solve ( b, x, x0, a, 1+4*a );
 }
 
+Func advect_func ( int b, Func d0, Func u, Func v )
+{
+    Func advected;
+    Var x("x"), y("y");
+
+    Expr dt0 = dt*N;
+
+    Expr xx = clamp(x-dt0*u(x,y), 0.5f, N+0.5f);
+    Expr yy = clamp(y-dt0*v(x,y), 0.5f, N+0.5f);
+    Expr i0=cast<int>(xx);
+    Expr j0=cast<int>(yy);
+    Expr i1=i0+1;
+    Expr j1=j0+1;
+    Expr s1 = xx-i0;
+    Expr t1 = yy-j0;
+    Expr s0 = 1-s1;
+    Expr t0 = 1-t1;
+    advected(x,y) = s0*(t0*d0(i0,j0)+t1*d0(i0,j1))+
+                    s1*(t0*d0(i1,j0)+t1*d0(i1,j1));
+
+    return set_bnd_func(N, b, advected);
+}
+
+static Func _advect[3];
 void advect ( int b, float * d, float * d0, float * u, float * v )
 {
+    #if 1
+    _x0.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)d0));
+    _u.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)u));
+    _v.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)v));
+
+    Buffer res(Float(32), N+2, N+2, 0, 0, (uint8_t*)d);
+    _advect[b].realize(res);
+    // Image<float> res = _advect[b].realize(N+2,N+2);
+    // memcpy(d, res.data(), sizeof(float)*res.width()*res.height());
+    #else
     int i, j, i0, j0, i1, j1;
     float x, y, s0, t0, s1, t1, dt0;
 
@@ -156,6 +186,7 @@ void advect ( int b, float * d, float * d0, float * u, float * v )
                      s1*(t0*d0[IX(i1,j0)]+t1*d0[IX(i1,j1)]);
     END_FOR
     set_bnd ( N, b, d );
+    #endif
 }
 
 void project ( float * u, float * v, float * p, float * div )
@@ -213,18 +244,23 @@ void hlinit( int _N, float _visc, float _diff, float _dt )
     _x = ImageParam(Float(32), 2, "Xbuf");
     _x0= ImageParam(Float(32), 2, "X0buf");
     _s = ImageParam(Float(32), 2, "Sbuf");
+    _u = ImageParam(Float(32), 2, "Ubuf");
+    _v = ImageParam(Float(32), 2, "Vbuf");
 
     Var x("x"),y("y");
-    Func in("X"), in0("X0"), s("S");
+    Func in("X"), in0("X0"), s("S"), u("U"), v("V");
     in(x,y) = _x(clamp(x, 0, N+1), clamp(y, 0, N+1));
     in0(x,y)=_x0(clamp(x, 0, N+1), clamp(y, 0, N+1));
     s(x,y)  = _s(clamp(x, 0, N+1), clamp(y, 0, N+1));
+    u(x,y)  = _u(clamp(x, 0, N+1), clamp(y, 0, N+1));
+    v(x,y)  = _v(clamp(x, 0, N+1), clamp(y, 0, N+1));
 
     _add_source = add_source_func(N, in, s, dt);
 
     for (int b = 0; b < 3; b++) {
         _set_bnd[b] = set_bnd_func(N, b, in);
         _lin_solve[b] = lin_solve_func(N, b, in, in0, _a, _c);
+        _advect[b] = advect_func(b, in0, u, v);
     }
 }
 
