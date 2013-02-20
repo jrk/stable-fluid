@@ -26,6 +26,7 @@ static Func _add_source;
 static Func _set_bnd[3];
 static Func _lin_solve[3];
 static Func _project;
+static Func _dens_step;
 
 void add_source ( int N, float * x, float * s, float dt  )
 {
@@ -103,7 +104,9 @@ Func lin_solve_func ( int N, int b, Func in, Func x0, Expr a, Expr c, int num_st
                                 +prevStep(cx,cy-1)
                                 +prevStep(cx,cy+1)))/c;
         prevStep = set_bnd_func ( N, b, f );
-        prevStep.compute_root().store_root().parallel(y);
+        if ((k-(num_steps-1))%1 == 0) {
+            prevStep.compute_root().store_root().parallel(y).vectorize(x, 8);
+        }
     }
 
     return prevStep;
@@ -131,12 +134,28 @@ void lin_solve ( int b, float * x, float * x0, float a, float c )
     #endif
 }
 
+Func diffuse_func( int b, Func x, Func x0, Expr diff )
+{
+    Expr a = dt*diff*N*N;
+    return lin_solve_func(N, b, x, x0, a, 1.0f+4.0f*a);
+}
+
+static Func _diffuse[3];
 void diffuse ( int b, float * x, float * x0, float diff )
 {
+    #if 1
+    _diff.set(diff);
+    _x.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)x));
+    _x0.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)x0));
+
+    Image<float> res = _diffuse[b].realize(N+2,N+2);
+    memcpy(x, res.data(), sizeof(float)*res.width()*res.height());
+    #else
     float a=dt*diff*N*N;
     // Param<Float(32)> diff;
     // Func solver = lin_solve_func(N, b, inf, x0f, a, 1+4*a);
     lin_solve ( b, x, x0, a, 1+4*a );
+    #endif
 }
 
 Func advect_func ( int b, Func d0, Func u, Func v )
@@ -251,11 +270,28 @@ void project ( float * u, float * v, float * p, float * div )
     #endif
 }
 
+Func dens_step_func ( Func x, Func x0, Func u, Func v )
+{
+    Func src_added = add_source_func(N, x, x0, dt);
+    Func diffused = diffuse_func(0, x0, src_added, diff);
+    return advect_func(0, diffused, u, v);
+}
+
 void dens_step ( float * x, float * x0, float * u, float * v )
 {
+    #if 1
+    _x.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)x));
+    _x0.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)x0));
+    _u.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)u));
+    _v.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)v));
+
+    Image<float> res = _dens_step.realize(N+2,N+2);
+    memcpy(x, res.data(), sizeof(float)*res.width()*res.height());
+    #else
     add_source ( N, x, x0, dt );
     SWAP ( x0, x ); diffuse ( 0, x, x0, diff );
     SWAP ( x0, x ); advect ( 0, x, x0, u, v );
+    #endif
 }
 
 void vel_step ( float * u, float * v, float * u0, float * v0 )
@@ -277,12 +313,12 @@ void step( float* u, float* v, float* u_prev, float* v_prev,
 }
 
 // TODO: switch to static compile?
-void hlinit( int _N, float _visc, float _diff, float _dt )
+void hlinit( int N_, float visc_, float diff_, float dt_ )
 {
-    N = _N;
-    visc = _visc;
-    diff = _diff;
-    dt = _dt;
+    N = N_;
+    visc = visc_;
+    diff = diff_;
+    dt = dt_;
 
     _x = ImageParam(Float(32), 2, "Xbuf");
     _x0= ImageParam(Float(32), 2, "X0buf");
@@ -299,14 +335,27 @@ void hlinit( int _N, float _visc, float _diff, float _dt )
     v(x,y)  = _v(clamp(x, 0, N+1), clamp(y, 0, N+1));
 
     _add_source = add_source_func(N, in, s, dt);
+    _add_source.compile_jit();
 
+    Expr a = dt*N*N*_diff;
     for (int b = 0; b < 3; b++) {
         _set_bnd[b] = set_bnd_func(N, b, in);
+        _set_bnd[b].compile_jit();
+
         _lin_solve[b] = lin_solve_func(N, b, in, in0, _a, _c);
+        _lin_solve[b].compile_jit();
+
         _advect[b] = advect_func(b, in0, u, v);
+        _advect[b].compile_jit();
+
+        _diffuse[b] = diffuse_func(b, in, in0, _diff);
+        _diffuse[b].compile_jit();
     }
 
     _project = project_func(u, v);
+    _project.compile_jit();
+
+    _dens_step = dens_step_func(in, in0, u, v);
 }
 
 void hlstep( int N, float* u, float* v, float* u_prev, float* v_prev,
