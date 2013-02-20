@@ -28,7 +28,8 @@
 extern void dens_step ( int N, float * x, float * x0, float * u, float * v, float diff, float dt );
 extern void vel_step ( int N, float * u, float * v, float * u0, float * v0, float visc, float dt );
 */
-extern void step( int N, float visc, float diff, float dt,
+extern void hlinit( int _N, float _visc, float _diff, float _dt );
+extern void step(
            float* u, float* v, float* u_prev, float* v_prev,
            float* dens, float* dens_prev );
 
@@ -259,8 +260,7 @@ static void reshape_func ( int width, int height )
 static void idle_func ( void )
 {
 	get_from_UI ( dens_prev, u_prev, v_prev );
-    step( N, visc, diff, dt,
-          u, v, u_prev, v_prev,
+    step( u, v, u_prev, v_prev,
           dens, dens_prev );
     
 
@@ -361,6 +361,8 @@ int main ( int argc, char ** argv )
 
 	if ( !allocate_data () ) exit ( 1 );
 	clear_data ();
+
+	hlinit( N, visc, diff, dt );
 
 	win_x = 512;
 	win_y = 512;
