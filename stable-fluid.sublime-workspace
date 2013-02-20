@@ -1,0 +1,292 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"buff",
+				"buffer_t	"
+			],
+			[
+				"di",
+				"difftime(time_t, time_t)	double"
+			],
+			[
+				"re",
+				"return"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 28.0,
+		"selected_items":
+		[
+			[
+				"pack",
+				"Package Control: Install Package"
+			],
+			[
+				"packset",
+				"Preferences: Package Control Settings – User"
+			],
+			[
+				"packagectr",
+				"Preferences: Package Control Settings – Default"
+			],
+			[
+				"upgra",
+				"Package Control: Upgrade Package"
+			],
+			[
+				"packagag",
+				"Package Control: Upgrade/Overwrite All Packages"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"",
+				"Package Control: List Packages"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"instp",
+				"Package Control: Install Package"
+			],
+			[
+				"discp",
+				"Package Control: Discover Packages"
+			],
+			[
+				"package",
+				"Package Control: List Packages"
+			]
+		],
+		"width": 435.0
+	},
+	"console":
+	{
+		"height": 125.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/src/lower.ml",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/src/ir_printer.ml",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/src/ir.ml",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/src/halide_cpp.ml",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/src/ir_printer.mli",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/src/analysis.mli",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/src/fir.ml",
+		"/Users/jrk/Library/Application Support/Sublime Text 2/Packages/User/Default (OSX).sublime-keymap",
+		"/Users/jrk/Library/Application Support/Sublime Text 2/Packages/Default/Default (OSX).sublime-keymap",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/src/.gitignore",
+		"/Users/jrk/Library/Application Support/Sublime Text 2/Packages/SublimeClang/SublimeClang.sublime-settings",
+		"/Users/jrk/Library/Application Support/Sublime Text 2/Packages/User/Preferences.sublime-settings",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/Func.cpp",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/cpp_bindings.sublime-project",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/Makefile",
+		"/usr/include/stdlib.h",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/Func.h",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/elf.h",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/Var.h",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/Util.h",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/Uniform.h",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/Type.h",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/Tuple.h",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/Reduction.h",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/MLVal.h",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/Image.h",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/Halide.h",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/Expr.h",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/elf.cpp",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/Var.cpp",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/Util.cpp",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/Type.cpp",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/Tuple.cpp",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/Expr.cpp",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/Reduction.cpp",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/MLVal.cpp",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp_bindings/Image.cpp",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/util/util.py",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/util/run_test.py",
+		"/Users/jrk/Library/Application Support/Sublime Text 2/Packages/Package Control/Package Control.sublime-settings",
+		"/Users/jrk/Library/Application Support/Sublime Text 2/Packages/User/Package Control.sublime-settings",
+		"/Users/jrk/Library/Application Support/Sublime Text 2/Packages/Default/Preferences.sublime-settings",
+		"/Users/jrk/Library/Application Support/Sublime Text 2/Packages/Default/Global.sublime-settings",
+		"/Users/jrk/Library/Application Support/Sublime Text 2/Packages/User/Base File.sublime-settings",
+		"/Users/jrk/Library/Application Support/Sublime Text 2/Packages/User/Global.sublime-settings",
+		"/usr/local/cuda/include/cuda.h",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/test/run_test.py"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"Producing",
+			"string_of_val_type",
+			"<\"",
+			"\"<\"",
+			"lower_function ",
+			"lower_function",
+			"intve",
+			"super+i",
+			"ctrl+s",
+			"/include",
+			"CU_EVENT_DEFAULT",
+			"event",
+			"cueventrecord"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 32.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.sftp":
+	{
+		"height": 0.0
+	},
+	"replace":
+	{
+		"height": 0.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+			[
+				"lower",
+				"lower.ml"
+			],
+			[
+				"irpr",
+				"ir_printer.mli"
+			],
+			[
+				"print",
+				"ir_printer.ml"
+			],
+			[
+				"ir.",
+				"ir.ml"
+			],
+			[
+				"cpp",
+				"halide_cpp.ml"
+			],
+			[
+				"",
+				"analysis.mli"
+			],
+			[
+				"ana",
+				"analysis.mli"
+			],
+			[
+				"fir",
+				"fir.ml"
+			],
+			[
+				"fun",
+				"Func.cpp"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": false,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true
+}

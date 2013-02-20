@@ -1,0 +1,15 @@
+{
+	"folders":
+	[
+		{
+			"path": "/Users/jrk/Dropbox/Projects/fimage/stable-fluid"
+		}
+	],
+    "settings":
+    {
+        "sublimeclang_debug_options": true,
+        "sublimeclang_options": [
+            "-I${folder:${project_path:hlsolver.cpp}}/../FImage/cpp/include"
+        ]
+	}
+}
