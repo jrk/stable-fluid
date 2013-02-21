@@ -28,7 +28,7 @@ Func set_bnd_func ( int N, int b, Func in )
     Expr clampY = clamp(y, 1, N);
     Expr interior = in(clampX, clampY);
 
-    b = 0;
+    b = 0; // NOTE: currently forcing everything not to impose boundaries - simplifies codegen
 
     if (b == 1) {
         f(x,y) = select(x < 1 || x > N,
