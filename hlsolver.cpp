@@ -56,13 +56,13 @@ Func set_bnd_func ( int N, int b, Func in )
     return f;
 }
 
-Func lin_solve_func ( int N, int b, Func in, Func x0, Expr a, Expr c, int num_steps=20 )
+Func lin_solve_func ( int N, int b, Func in, Func x0, Expr a, Expr c, int num_steps=10 )
 {
     Expr cx = x;
     Expr cy = y;
     cx = clamp(x, 1, N);
     cy = clamp(y, 1, N);
-
+    #if 0
     Func* step = new Func[num_steps+1]; // TODO: leaks - don't care for now
     step[0] = in;
     Var xi("xi"), yi("yi");
@@ -85,6 +85,23 @@ Func lin_solve_func ( int N, int b, Func in, Func x0, Expr a, Expr c, int num_st
     }
 
     return step[num_steps];
+    #else // reduction
+    Func solve;
+    Var k("k");
+    RDom rk(1, num_steps);
+    solve(x,y,k) = in(x,y);
+    #if 0
+    solve(x,y,rk) = (x0(cx,cy) + a*(solve(cx-1,cy,rk-1)
+                                   +solve(cx+1,cy,rk-1)
+                                   +solve(cx,cy-1,rk-1)
+                                   +solve(cx,cy+1,rk-1)))/c;
+    #else
+    solve(x,y,rk) = in(x,y);
+    #endif
+    Func solved;
+    solved(x,y) = solve(x,y,num_steps-1);
+    return solved;
+    #endif
 }
 
 Func diffuse_func( int b, Func dens, Func dens0, Expr diff )
