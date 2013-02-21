@@ -56,28 +56,35 @@ Func set_bnd_func ( int N, int b, Func in )
     return f;
 }
 
-Func lin_solve_func ( int N, int b, Func in, Func x0, Expr a, Expr c, int num_steps=10 )
+Func lin_solve_func ( int N, int b, Func in, Func x0, Expr a, Expr c, int num_steps=20 )
 {
-    Expr cx = clamp(x, 1, N);
-    Expr cy = clamp(y, 1, N);
-    Func prevStep = in;
+    Expr cx = x;
+    Expr cy = y;
+    cx = clamp(x, 1, N);
+    cy = clamp(y, 1, N);
 
-    for ( int k=0 ; k<num_steps ; k++ ) {
+    Func* step = new Func[num_steps+1]; // TODO: leaks - don't care for now
+    step[0] = in;
+    Var xi("xi"), yi("yi");
+
+    for ( int k=1 ; k<=num_steps ; k++ ) {
         Func f;
-        f(x,y) = (x0(cx,cy) + a*(prevStep(cx-1,cy)
-                                +prevStep(cx+1,cy)
-                                +prevStep(cx,cy-1)
-                                +prevStep(cx,cy+1)))/c;
-        prevStep = set_bnd_func ( N, b, f );
-        // prevStep = f;
-        // if ((k-(num_steps-1))%1 == 0) {
-        if (true) {
-            f.compute_root().store_root();//.parallel(y);
-            prevStep.compute_root().store_root();//.parallel(y);//.vectorize(x, 8);
+        f(x,y) = (x0(cx,cy) + a*(step[k-1](cx-1,cy)
+                                +step[k-1](cx+1,cy)
+                                +step[k-1](cx,cy-1)
+                                +step[k-1](cx,cy+1)))/c;
+        step[k] = set_bnd_func ( N, b, f );
+        if ((k-(num_steps))%2 == 0) {
+            step[k].tile(x, y, xi, yi, 16, 16);
+            step[k].compute_root().store_root().parallel(y);//.vectorize(xi, 8);
+
+            for (int i = k-1; (i-(num_steps))%2 != 0 && i > 0; i--) {
+                step[i].compute_at(step[k], x).store_at(step[k], x);
+            }
         }
     }
 
-    return prevStep;
+    return step[num_steps];
 }
 
 Func diffuse_func( int b, Func dens, Func dens0, Expr diff )
