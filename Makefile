@@ -1,5 +1,5 @@
 HL_PATH ?= ../FImage/cpp
-GXX ?= g++-4.6
+GXX ?= g++
 
 sim: demo.c hlsolver.cpp
 	${GXX} -g -framework OpenGL -framework GLUT -I${HL_PATH}/include -L${HL_PATH}/bin -lHalide $^ -o $@

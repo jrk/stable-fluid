@@ -291,7 +291,7 @@ static void open_glut_window ( void )
 
 	glutInitWindowPosition ( 0, 0 );
 	glutInitWindowSize ( win_x, win_y );
-	win_id = glutCreateWindow ( "Alias | wavefront" );
+	win_id = glutCreateWindow ( "Stable Fluids" );
 
 	glClearColor ( 0.0f, 0.0f, 0.0f, 1.0f );
 	glClear ( GL_COLOR_BUFFER_BIT );
