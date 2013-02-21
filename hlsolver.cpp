@@ -8,25 +8,25 @@ using namespace Halide;
 #define FOR_EACH_CELL for ( i=1 ; i<=N ; i++ ) { for ( j=1 ; j<=N ; j++ ) {
 #define END_FOR }}
 
+static int N;
+static float dt, diff, visc;
+static Param<float> _diff, _visc, _a, _c;
+static ImageParam _x, _s, _x0, _u, _v, _u0, _v0;
+static Func _add_source;
+static Func _set_bnd[3];
+static Func _lin_solve[3];
+static Func _project;
+static Func _dens_step, _vel_step;
+
 Func add_source_func( int N, Func in, Func s, float dt )
 {
-    Func f("add_source");
+    Func f;
     Var x("x"), y("y");
 
     f(x,y) = in(x,y) + dt*s(x,y);
 
     return f;
 }
-
-static int N;
-static float dt, diff, visc;
-static Param<float> _diff, _visc, _a, _c;
-static ImageParam _x, _s, _x0, _u, _v;
-static Func _add_source;
-static Func _set_bnd[3];
-static Func _lin_solve[3];
-static Func _project;
-static Func _dens_step;
 
 void add_source ( int N, float * x, float * s, float dt  )
 {
@@ -54,14 +54,25 @@ Func set_bnd_func ( int N, int b, Func in )
 
     if (b == 1) {
         f(x,y) = select(x < 1 || x > N,
+            #if 1
+                        -in(clampX, y),
+                        in(x,y));
+            #else
                         -interior,
                         interior);
+            #endif
     } else if (b == 2) {
         f(x,y) = select(y < 1 || y > N,
+            #if 1
+                        -in(x, clampY),
+                        in(x,y));
+            #else
                         -interior,
                         interior);
+            #endif
     } else {
-        f(x,y) = interior;
+        // f(x,y) = interior;
+        f = in;
     }
 
     return f;
@@ -90,13 +101,14 @@ void set_bnd ( int N, int b, float * x )
     #endif
 }
 
-Func lin_solve_func ( int N, int b, Func in, Func x0, Expr a, Expr c, int num_steps=20 )
+Func lin_solve_func ( int N, int b, Func in, Func x0, Expr a, Expr c, int num_steps=10 )
 {
     Var x("x"),y("y");
     Expr cx = clamp(x, 1, N);
     Expr cy = clamp(y, 1, N);
     Func prevStep = in;
 
+    #if 1
     for ( int k=0 ; k<num_steps ; k++ ) {
         Func f;
         f(x,y) = (x0(cx,cy) + a*(prevStep(cx-1,cy)
@@ -104,10 +116,16 @@ Func lin_solve_func ( int N, int b, Func in, Func x0, Expr a, Expr c, int num_st
                                 +prevStep(cx,cy-1)
                                 +prevStep(cx,cy+1)))/c;
         prevStep = set_bnd_func ( N, b, f );
-        if ((k-(num_steps-1))%1 == 0) {
-            prevStep.compute_root().store_root().parallel(y).vectorize(x, 8);
+        // prevStep = f;
+        // if ((k-(num_steps-1))%1 == 0) {
+        if (true) {
+            f.compute_root().store_root();//.parallel(y);
+            prevStep.compute_root().store_root();//.parallel(y);//.vectorize(x, 8);
         }
     }
+    #else
+
+    #endif
 
     return prevStep;
 }
@@ -191,8 +209,6 @@ void advect ( int b, float * d, float * d0, float * u, float * v )
 
     Buffer res(Float(32), N+2, N+2, 0, 0, (uint8_t*)d);
     _advect[b].realize(res);
-    // Image<float> res = _advect[b].realize(N+2,N+2);
-    // memcpy(d, res.data(), sizeof(float)*res.width()*res.height());
     #else
     int i, j, i0, j0, i1, j1;
     float x, y, s0, t0, s1, t1, dt0;
@@ -234,7 +250,7 @@ Func project_func ( Func u, Func v )
                         select(uv == 2,
                             p(x,y),
                             div(x,y))));
-    // res.unroll(uv, 4);
+    res.unroll(uv, 4);
     return res;
 }
 
@@ -294,8 +310,53 @@ void dens_step ( float * x, float * x0, float * u, float * v )
     #endif
 }
 
+Func vel_step_func( Func u, Func v, Func u0, Func v0 )
+{
+    Var x("x"), y("y");
+
+    Func uu = add_source_func(N, u, u0, dt);
+    Func vv = add_source_func(N, v, v0, dt);
+    uu.compute_root().store_root();
+    vv.compute_root().store_root();
+
+    Func diffU = diffuse_func(1, u0, uu, visc);
+    Func diffV = diffuse_func(2, v0, vv, visc);
+    diffU.compute_root().store_root();
+    diffV.compute_root().store_root();
+
+    Func projected = project_func(diffU, diffV);
+    projected.compute_root().store_root();
+
+    Func au, au0, av, av0;
+    au0(x,y) = projected(x,y,0);
+    av0(x,y) = projected(x,y,1);
+    au(x,y)  = projected(x,y,2);
+    av(x,y)  = projected(x,y,3);
+
+    Func adU = advect_func(1, au0, au0, av0);
+    Func adV = advect_func(2, av0, au0, av0);
+    adU.compute_root().store_root();
+    adV.compute_root().store_root();
+
+    return project_func(adU, adV);
+}
+
 void vel_step ( float * u, float * v, float * u0, float * v0 )
 {
+    #if 1
+    _u.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)u));
+    _v.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)v));
+    _u0.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)u0));
+    _v0.set(Buffer(Float(32), N+2, N+2, 0, 0, (uint8_t*)v0));
+
+    Image<float> res = _vel_step.realize(N+2, N+2, 4);
+    size_t sz = sizeof(float)*res.width()*res.height();
+    size_t stride = res.stride(2);
+    memcpy(  u, res.data()+0*stride, sz);
+    memcpy(  v, res.data()+1*stride, sz);
+    memcpy( u0, res.data()+2*stride, sz);
+    memcpy( v0, res.data()+3*stride, sz);
+    #else
     add_source ( N, u, u0, dt ); add_source ( N, v, v0, dt );
     SWAP ( u0, u ); diffuse ( 1, u, u0, visc );
     SWAP ( v0, v ); diffuse ( 2, v, v0, visc );
@@ -303,6 +364,7 @@ void vel_step ( float * u, float * v, float * u0, float * v0 )
     SWAP ( u0, u ); SWAP ( v0, v );
     advect ( 1, u, u0, u0, v0 ); advect ( 2, v, v0, u0, v0 );
     project ( u, v, u0, v0 );
+    #endif
 }
 
 void step( float* u, float* v, float* u_prev, float* v_prev,
@@ -325,15 +387,22 @@ void hlinit( int N_, float visc_, float diff_, float dt_ )
     _s = ImageParam(Float(32), 2, "Sbuf");
     _u = ImageParam(Float(32), 2, "Ubuf");
     _v = ImageParam(Float(32), 2, "Vbuf");
+    _u0 = ImageParam(Float(32), 2, "U0buf");
+    _v0 = ImageParam(Float(32), 2, "V0buf");
 
     Var x("x"),y("y");
-    Func in("X"), in0("X0"), s("S"), u("U"), v("V");
-    in(x,y) = _x(clamp(x, 0, N+1), clamp(y, 0, N+1));
-    in0(x,y)=_x0(clamp(x, 0, N+1), clamp(y, 0, N+1));
-    s(x,y)  = _s(clamp(x, 0, N+1), clamp(y, 0, N+1));
-    u(x,y)  = _u(clamp(x, 0, N+1), clamp(y, 0, N+1));
-    v(x,y)  = _v(clamp(x, 0, N+1), clamp(y, 0, N+1));
+    Func in("X"), in0("X0"), s("S"), u("U"), v("V"), u0("U0"), v0("V0");
+    Expr cx = clamp(x, 0, N+1);
+    Expr cy = clamp(y, 0, N+1);
+    in(x,y) = _x(cx, cy);
+    in0(x,y)=_x0(cx, cy);
+    s(x,y)  = _s(cx, cy);
+    u(x,y)  = _u(cx, cy);
+    v(x,y)  = _v(cx, cy);
+    u0(x,y) =_u0(cx, cy);
+    v0(x,y) =_v0(cx, cy);
 
+    #if 0
     _add_source = add_source_func(N, in, s, dt);
     _add_source.compile_jit();
 
@@ -354,8 +423,17 @@ void hlinit( int N_, float visc_, float diff_, float dt_ )
 
     _project = project_func(u, v);
     _project.compile_jit();
+    #endif
 
+    fprintf(stderr, "Compile dens_step...");
     _dens_step = dens_step_func(in, in0, u, v);
+    _dens_step.compile_jit();
+    fprintf(stderr, "done\n");
+
+    fprintf(stderr, "Compile vel_step...");
+    _vel_step = vel_step_func(u, v, u0, v0);
+    _vel_step.compile_jit();
+    fprintf(stderr, "done\n");
 }
 
 void hlstep( int N, float* u, float* v, float* u_prev, float* v_prev,
