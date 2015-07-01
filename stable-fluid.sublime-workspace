@@ -4,6 +4,26 @@
 		"selected_items":
 		[
 			[
+				"ho",
+				"host_ptr() const	void *"
+			],
+			[
+				"Image",
+				"ImageParam	class"
+			],
+			[
+				"add_source",
+				"add_source_func(int N, Halide::Func in, Halide::Func s, float dt)	Halide::Func"
+			],
+			[
+				"real",
+				"realize(Halide::Buffer dst)	void"
+			],
+			[
+				"lin_so",
+				"lin_solve_func(int N, int b, Halide::Func in, Halide::Func x0, float a, float c)	Halide::Func"
+			],
+			[
 				"buff",
 				"buffer_t	"
 			],
@@ -19,13 +39,108 @@
 	},
 	"buffers":
 	[
+		{
+			"file": "demo.c",
+			"settings":
+			{
+				"buffer_size": 8334,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "solver.c",
+			"settings":
+			{
+				"buffer_size": 3127,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "solver_dens_step.h",
+			"settings":
+			{
+				"buffer_size": 503,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "solver_vel_step.h",
+			"settings":
+			{
+				"buffer_size": 496,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "hlsolver.cpp",
+			"settings":
+			{
+				"buffer_size": 8957,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/Users/jrk/Dropbox/Projects/fimage/FImage/cpp/test/reduction_chain.cpp",
+			"settings":
+			{
+				"buffer_size": 1149,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Makefile",
+			"settings":
+			{
+				"buffer_size": 1076,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "stable-fluid.sublime-project",
+			"settings":
+			{
+				"buffer_size": 282,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/Users/jrk/Dropbox/Projects/fimage/FImage/cpp/include/Halide.h",
+			"settings":
+			{
+				"buffer_size": 185499,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "hlsolver-static.cpp",
+			"settings":
+			{
+				"buffer_size": 2094,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "",
+			"file": "/Users/jrk/Dropbox/Projects/fimage/FImage/.git/MERGE_MSG",
+			"file_size": -1,
+			"file_write_time": -1,
+			"settings":
+			{
+				"buffer_size": 0,
+				"line_ending": "Unix"
+			}
+		}
 	],
 	"build_system": "",
 	"command_palette":
 	{
-		"height": 28.0,
+		"height": 375.0,
 		"selected_items":
 		[
+			[
+				"i",
+				"Indentation: Convert to Spaces"
+			],
 			[
 				"pack",
 				"Package Control: Install Package"
@@ -92,6 +207,12 @@
 	},
 	"file_history":
 	[
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/.git/MERGE_MSG",
+		"/Volumes/data/JrkBackup/Users/jrk/Dropbox/Projects/fimage/streamit/streams/docs/esop-03-phased/references.bib",
+		"/Users/jrk/Dropbox/Projects/job talk/assets/ILM_logo.svg",
+		"/Users/jrk/Dropbox/Projects/job talk/.git/COMMIT_EDITMSG",
+		"/Users/jrk/Dropbox/Projects/fimage/stable-fluid/hlsolver.cpp",
+		"/Users/jrk/Dropbox/Projects/fimage/FImage/cpp/include/Halide.h",
 		"/Users/jrk/Dropbox/Projects/fimage/FImage/src/lower.ml",
 		"/Users/jrk/Dropbox/Projects/fimage/FImage/src/ir_printer.ml",
 		"/Users/jrk/Dropbox/Projects/fimage/FImage/src/ir.ml",
@@ -156,6 +277,32 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"res",
+			".set(Buffer(Float(32), ",
+			"polyhedral",
+			"vel_step_func",
+			"add_source",
+			"b",
+			"diffuse_func",
+			"set_bnd_func",
+			"clamp(x, 0, N+1)",
+			"Debug",
+			"Print",
+			"_add_source",
+			"init",
+			", dt",
+			" dt",
+			"dt",
+			"diff",
+			"visc",
+			"step(",
+			"add_source",
+			"diffuse",
+			"add_s",
+			"x",
+			"dt",
+			"add_source",
+			"omp",
 			"Producing",
 			"string_of_val_type",
 			"<\"",
@@ -186,8 +333,406 @@
 	"groups":
 	[
 		{
+			"selected": 4,
 			"sheets":
 			[
+				{
+					"buffer": 0,
+					"file": "demo.c",
+					"settings":
+					{
+						"buffer_size": 8334,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								638,
+								638
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/C++/C.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "solver.c",
+					"settings":
+					{
+						"buffer_size": 3127,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								175,
+								175
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/C++/C.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "solver_dens_step.h",
+					"settings":
+					{
+						"buffer_size": 503,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								159,
+								159
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/C++/C++.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "solver_vel_step.h",
+					"settings":
+					{
+						"buffer_size": 496,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								496,
+								496
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/C++/C++.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "hlsolver.cpp",
+					"settings":
+					{
+						"buffer_size": 8957,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4840,
+								4840
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2975.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 7,
+			"sheets":
+			[
+				{
+					"buffer": 5,
+					"file": "/Users/jrk/Dropbox/Projects/fimage/FImage/cpp/test/reduction_chain.cpp",
+					"settings":
+					{
+						"buffer_size": 1149,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								121,
+								121
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "Makefile",
+					"settings":
+					{
+						"buffer_size": 1076,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/Makefile/Makefile.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "stable-fluid.sublime-project",
+					"settings":
+					{
+						"buffer_size": 282,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								282,
+								282
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/JavaScript/JSON.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "hlsolver.cpp",
+					"settings":
+					{
+						"buffer_size": 8957,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3096.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "/Users/jrk/Dropbox/Projects/fimage/FImage/cpp/include/Halide.h",
+					"settings":
+					{
+						"buffer_size": 185499,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "hlsolver.cpp",
+					"settings":
+					{
+						"buffer_size": 8957,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3112.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "hlsolver-static.cpp",
+					"settings":
+					{
+						"buffer_size": 2094,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1864,
+								1864
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "/Users/jrk/Dropbox/Projects/fimage/FImage/.git/MERGE_MSG",
+					"settings":
+					{
+						"buffer_size": 0,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
 			]
 		}
 	],
@@ -208,11 +753,18 @@
 				0,
 				1,
 				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
 			]
 		],
 		"cols":
 		[
 			0.0,
+			0.5,
 			1.0
 		],
 		"rows":
@@ -222,6 +774,10 @@
 		]
 	},
 	"menu_visible": true,
+	"output.clang":
+	{
+		"height": 110.0
+	},
 	"output.sftp":
 	{
 		"height": 0.0
@@ -236,6 +792,42 @@
 		"height": 0.0,
 		"selected_items":
 		[
+			[
+				"hlso",
+				"hlsolver.cpp"
+			],
+			[
+				"vel",
+				"solver_vel_step.h"
+			],
+			[
+				"dens_",
+				"solver_dens_step.h"
+			],
+			[
+				"hlss",
+				"hlsolver-static.cpp"
+			],
+			[
+				"hl",
+				"hlsolver.cpp"
+			],
+			[
+				"sol",
+				"solver.c"
+			],
+			[
+				"",
+				"stable-fluid.sublime-project"
+			],
+			[
+				"hls",
+				"hlsolver.cpp"
+			],
+			[
+				"make",
+				"Makefile"
+			],
 			[
 				"lower",
 				"lower.ml"
@@ -255,10 +847,6 @@
 			[
 				"cpp",
 				"halide_cpp.ml"
-			],
-			[
-				"",
-				"analysis.mli"
 			],
 			[
 				"ana",
@@ -283,7 +871,7 @@
 		],
 		"width": 0.0
 	},
-	"show_minimap": true,
+	"show_minimap": false,
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": false,
