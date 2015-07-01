@@ -62,7 +62,7 @@ Func lin_solve_func ( int N, int b, Func in, Func x0, Expr a, Expr c, int num_st
     Expr cy = y;
     cx = clamp(x, 1, N);
     cy = clamp(y, 1, N);
-    #if 0
+    #if 1
     Func* step = new Func[num_steps+1]; // TODO: leaks - don't care for now
     step[0] = in;
     Var xi("xi"), yi("yi");
@@ -256,12 +256,16 @@ void hlinit( int N_, float visc_, float diff_, float dt_ )
 
     fprintf(stderr, "Compile dens_step...");
     _dens_step = dens_step_func(dens, dens0, u, v);
+	#ifndef HL_STATIC_COMPILE
     _dens_step.compile_jit();
+	#endif
     fprintf(stderr, "done\n");
 
     fprintf(stderr, "Compile vel_step...");
     _vel_step = vel_step_func(u, v, u0, v0);
+	#ifndef HL_STATIC_COMPILE
     _vel_step.compile_jit();
+	#endif
     fprintf(stderr, "done\n");
 }
 
@@ -270,3 +274,45 @@ void hlstep( int N, float* u, float* v, float* u_prev, float* v_prev,
 {
 
 }
+
+#ifdef HL_STATIC_COMPILE
+int main ( int argc, char ** argv )
+{
+	int N;
+	float dt, diff, visc, force, source;
+	
+	if ( argc != 1 && argc != 7 ) {
+		fprintf ( stderr, "usage : %s N dt diff visc force source\n", argv[0] );
+		fprintf ( stderr, "where:\n" );\
+		fprintf ( stderr, "\t N      : grid resolution\n" );
+		fprintf ( stderr, "\t dt     : time step\n" );
+		fprintf ( stderr, "\t diff   : diffusion rate of the density\n" );
+		fprintf ( stderr, "\t visc   : viscosity of the fluid\n" );
+		fprintf ( stderr, "\t force  : scales the mouse movement that generate a force\n" );
+		fprintf ( stderr, "\t source : amount of density that will be deposited\n" );
+		exit ( 1 );
+	}
+
+	if ( argc == 1 ) {
+		N = 64;
+		dt = 0.1f;
+		diff = 0.0f;
+		visc = 0.0f;
+		force = 5.0f;
+		source = 100.0f;
+		fprintf ( stderr, "Using defaults : N=%d dt=%g diff=%g visc=%g force = %g source=%g\n",
+			N, dt, diff, visc, force, source );
+	} else {
+		N = atoi(argv[1]);
+		dt = atof(argv[2]);
+		diff = atof(argv[3]);
+		visc = atof(argv[4]);
+		force = atof(argv[5]);
+		source = atof(argv[6]);
+	}
+	
+	hlinit(N, visc, diff, dt);
+	_dens_step.compile_to_file("solver_dens_step", _dens, _dens0, _u, _v);
+	_vel_step.compile_to_file("solver_vel_step", _u, _v, _u0, _v0);
+}
+#endif
