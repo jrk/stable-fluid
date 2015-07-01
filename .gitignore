@@ -1,2 +1,9 @@
 sim
 *.dSYM
+*.o
+solver_dens_step.h
+solver_dens_step.o
+solver_vel_step.h
+solver_vel_step.o
+hlsolver
+sim_static
